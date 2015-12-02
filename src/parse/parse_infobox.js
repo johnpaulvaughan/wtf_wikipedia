@@ -6,6 +6,23 @@ function parse_infobox(str) {
   if(str) {
     //this collapsible list stuff is just a headache
     str = str.replace(/\{\{Collapsible list[^\}]{10,1000}\}\}/g, '');
+
+
+
+    /*  
+    JPV Turning a flatlist into an array
+    */
+    var reg = new RegExp(/\{\{flatlist[^\}]{10,1000}\}\}/g);
+    var badlists = str.match(reg);
+      for (i=0; i<badlists.length; i++) {
+       var fix = badlists[i].replace(/\n\*/g, '|');
+       fix = fix.replace("{{flatlist|", '{{');
+       fix = fix.replace("}}", "");
+       str = str.replace(badlists[i], fix);
+      }   
+    /**/ 
+ 
+
     str.replace(/\r/g, '').split(/\n/).forEach(function (l) {
       if(l.match(/^\|/)) {
         var key = l.match(/^\| ?(.{1,200}?)[ =]/) || [];
@@ -23,10 +40,32 @@ function parse_infobox(str) {
             obj[key].text = obj[key].text.replace(/,/g);
             obj[key].text = parseInt(obj[key].text, 10);
           }
-        }
+
+
+
+          /*  
+          JPV Turning a flatlist into an array
+          */
+          if(obj[key].text && obj[key].text.match(/\{\{/)) {
+            obj[key].text = obj[key].text.split("|"); 
+            obj[key].text.shift();
+            obj[key].text = obj[key].text.map(function(elem){return elem.trim();});
+          }
+          /**/ 
+
+
+
+        } 
       }
     })
   }
   return obj
 }
+
+
+
+
+
+
 module.exports = parse_infobox;
+ 
